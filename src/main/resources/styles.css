@@ -1,0 +1,108 @@
+/* Estilos del aplicativo FNC Converter */
+
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.panel-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.mono {
+    -fx-font-family: "Consolas", "Menlo", "monospace";
+    -fx-font-size: 12.5px;
+}
+
+.primary-button {
+    -fx-font-weight: bold;
+}
+
+.validation-ok {
+    -fx-control-inner-background: #e8f5e9;
+}
+
+.validation-error {
+    -fx-control-inner-background: #fdecea;
+}
+
+.syntax-error {
+    -fx-border-color: #b3261e;
+    -fx-border-width: 2px;
+    -fx-border-radius: 3px;
+}
+
+.section-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.step-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.diagnostic-box {
+    -fx-background-color: #f4f6f8;
+    -fx-border-color: #d0d7de;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 10px;
+}
+
+.diagnostic-text {
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+}
+
+.diff-subtitle {
+    -fx-font-weight: bold;
+}
+
+.result-card {
+    -fx-background-color: #fbfdfb;
+    -fx-border-color: #c5e1c5;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.mono-flow {
+    -fx-font-family: "Consolas", "Menlo", "monospace";
+    -fx-font-size: 12.5px;
+}
+
+.diff-removed {
+    -fx-fill: #b3261e;
+    -fx-strikethrough: true;
+}
+
+.diff-added {
+    -fx-fill: #1b7f2b;
+}
+
+.diff-info {
+    -fx-fill: #444444;
+}
+
+.diff-unchanged {
+    -fx-fill: #666666;
+    -fx-font-style: italic;
+}
+
+.status-bar {
+    -fx-text-fill: #444444;
+    -fx-font-style: italic;
+}
+
+.status-ok {
+    -fx-text-fill: #1b7f2b;
+    -fx-font-weight: bold;
+}
+
+.status-error {
+    -fx-text-fill: #b3261e;
+    -fx-font-weight: bold;
+}
