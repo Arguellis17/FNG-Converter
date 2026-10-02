@@ -40,3 +40,11 @@ bin/
 
 # Course reference material (kept locally, not tracked)
 Entrenamiento\ Algoritmo.pdf
+
+# Google Docs / Office lock files
+~$*
+.~lock.*#
+
+# Local scratch
+*.local
+scratch/
