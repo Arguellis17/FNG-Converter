@@ -48,3 +48,9 @@ Entrenamiento\ Algoritmo.pdf
 # Local scratch
 *.local
 scratch/
+
+# Guías y notas de trabajo (locales, no versionadas)
+AGENTS.md
+docs/ALGORITMO_FNG.md
+contexto-proyecto-para-claude.md
+verificacion-fng-para-claude.txt
