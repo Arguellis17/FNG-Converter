@@ -59,6 +59,28 @@ class LeftRecursionEliminatorTest {
         assertEquals(2, fixture.registry().recursionVariables().size());
     }
 
+    /** Punto 0: productionsRemoved/productionsAdded son el delta neto del paso. */
+    @Test
+    void removedAndAddedAreNetDelta() {
+        Fixture fixture = run(g1());
+        TransformationStep stepA = fixture.steps().get(0);
+
+        assertEquals(List.of("A -> S T1"), stepA.getProductionsRemoved());
+        assertEquals(List.of(
+                "A -> 2 T1",
+                "A -> 2 T1 A.1",
+                "A -> 1 A.1",
+                "A.1 -> B T1",
+                "A.1 -> B T1 A.1"),
+                stepA.getProductionsAdded());
+        assertFalse(stepA.getProductionsRemoved().contains("A -> A B T1"));
+
+        TransformationStep stepB = fixture.steps().get(1);
+        assertEquals(List.of("B -> B T2"), stepB.getProductionsRemoved());
+        assertEquals(List.of("B -> 2 B.1", "B.1 -> T2", "B.1 -> T2 B.1"),
+                stepB.getProductionsAdded());
+    }
+
     /** G2: solo cambia B (un paso). */
     @Test
     void g2EliminatesRecursionInB() {

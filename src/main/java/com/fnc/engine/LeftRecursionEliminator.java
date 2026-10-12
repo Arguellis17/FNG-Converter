@@ -27,7 +27,9 @@ import java.util.Set;
  * </ol>
  * Se emite un {@link TransformationStep} por cada variable que cambió; las
  * variables que no cambian no generan paso. Si ninguna cambió, se emite uno solo
- * con el mensaje de "sin cambios". La gramática recibida nunca se muta.
+ * con el mensaje de "sin cambios". Los {@code productionsRemoved} y
+ * {@code productionsAdded} de cada paso son el delta neto entre
+ * {@code grammarBefore} y {@code grammarAfter}. La gramática recibida nunca se muta.
  */
 public class LeftRecursionEliminator {
 
@@ -71,31 +73,34 @@ public class LeftRecursionEliminator {
 
             List<Production> productions = new ArrayList<>(current.getProductions());
             Set<String> variables = new LinkedHashSet<>(current.getVariables());
-            List<String> removed = new ArrayList<>();
-            List<String> added = new ArrayList<>();
             List<String> details = new ArrayList<>();
 
-            boolean changed = substituteEarlier(productions, variable, i, removed, added, details);
-            changed |= eliminateImmediateRecursion(
-                    productions, variables, variable, removed, added, details);
+            substituteEarlier(productions, variable, i, details);
+            eliminateImmediateRecursion(productions, variables, variable, details);
 
-            if (changed) {
-                current.setProductions(productions);
-                current.setVariables(variables);
-                details.add(0, "Procesando " + variable + " (variable " + (i + 1)
-                        + " de " + total + ").");
-                steps.add(new TransformationStep(
-                        "Eliminación de recursividad izquierda — " + variable,
-                        "Se sustituyen las producciones y se elimina la recursividad "
-                        + "inmediata de " + variable + ".",
-                        stepBefore,
-                        current.copy(),
-                        removed,
-                        added,
-                        details,
-                        MENU_NUMBER,
-                        null));
+            List<String> beforeStrings = productionStrings(current.getProductions());
+            List<String> afterStrings = productionStrings(productions);
+            List<String> removed = difference(beforeStrings, afterStrings);
+            List<String> added = difference(afterStrings, beforeStrings);
+            if (removed.isEmpty() && added.isEmpty()) {
+                continue;
             }
+
+            current.setProductions(productions);
+            current.setVariables(variables);
+            details.add(0, "Procesando " + variable + " (variable " + (i + 1)
+                    + " de " + total + ").");
+            steps.add(new TransformationStep(
+                    "Eliminación de recursividad izquierda — " + variable,
+                    "Se sustituyen las producciones y se elimina la recursividad "
+                    + "inmediata de " + variable + ".",
+                    stepBefore,
+                    current.copy(),
+                    removed,
+                    added,
+                    details,
+                    MENU_NUMBER,
+                    null));
         }
 
         if (steps.isEmpty()) {
@@ -127,10 +132,8 @@ public class LeftRecursionEliminator {
      * (a) Sustituye las producciones {@code Xi → Xj α} con {@code j < i} por una
      * por cada producción de {@code Xj}, en la posición de la producción original.
      */
-    private boolean substituteEarlier(List<Production> productions, String variable, int index,
-                                      List<String> removed, List<String> added,
-                                      List<String> details) {
-        boolean changed = false;
+    private void substituteEarlier(List<Production> productions, String variable, int index,
+                                   List<String> details) {
         boolean substituted = true;
         while (substituted) {
             substituted = false;
@@ -149,9 +152,7 @@ public class LeftRecursionEliminator {
                     continue;
                 }
 
-                changed = true;
                 substituted = true;
-                addUnique(removed, production.toString());
                 details.add("Reemplazando " + first + " en " + variable + ": "
                         + render(production) + ".");
 
@@ -166,22 +167,19 @@ public class LeftRecursionEliminator {
                     if (!productions.contains(replacement)) {
                         productions.add(insertAt, replacement);
                         insertAt++;
-                        addUnique(added, replacement.toString());
                     }
                 }
                 break;
             }
         }
-        return changed;
     }
 
     /**
      * (b) Reemplaza la recursividad inmediata de {@code Xi} por las producciones
      * base y sus versiones con la auxiliar {@code Xi.1}.
      */
-    private boolean eliminateImmediateRecursion(List<Production> productions, Set<String> variables,
-                                                String variable, List<String> removed,
-                                                List<String> added, List<String> details) {
+    private void eliminateImmediateRecursion(List<Production> productions, Set<String> variables,
+                                             String variable, List<String> details) {
         List<Production> recursive = new ArrayList<>();
         List<Production> nonRecursive = new ArrayList<>();
         for (Production production : productions) {
@@ -197,7 +195,7 @@ public class LeftRecursionEliminator {
         }
 
         if (recursive.isEmpty() || nonRecursive.isEmpty()) {
-            return false;
+            return;
         }
 
         String auxiliary = registry.recursionVariable(variable);
@@ -224,17 +222,7 @@ public class LeftRecursionEliminator {
             auxiliaryProductions.add(new Production(auxiliary, rightSide));
         }
 
-        List<Production> oldProductions = new ArrayList<>();
-        for (Production production : productions) {
-            if (production.getLeftSide().equals(variable)) {
-                oldProductions.add(production);
-            }
-        }
-        for (Production production : oldProductions) {
-            addUnique(removed, production.toString());
-        }
-
-        int insertAt = productions.indexOf(oldProductions.get(0));
+        int insertAt = indexOfFirstWithLeft(productions, variable);
         productions.removeIf(p -> p.getLeftSide().equals(variable));
         if (insertAt < 0 || insertAt > productions.size()) {
             insertAt = productions.size();
@@ -243,13 +231,11 @@ public class LeftRecursionEliminator {
             if (!productions.contains(production)) {
                 productions.add(insertAt, production);
                 insertAt++;
-                addUnique(added, production.toString());
             }
         }
         for (Production production : auxiliaryProductions) {
             if (!productions.contains(production)) {
                 productions.add(production);
-                addUnique(added, production.toString());
             }
         }
 
@@ -260,8 +246,6 @@ public class LeftRecursionEliminator {
         details.add("Eliminando recursividad inmediata: "
                 + String.join(", ", recursiveTexts)
                 + ". Se crea la variable " + auxiliary + ".");
-
-        return true;
     }
 
     private static List<String> suffixFromOne(Production production) {
@@ -278,10 +262,35 @@ public class LeftRecursionEliminator {
         return result;
     }
 
-    private static void addUnique(List<String> list, String value) {
-        if (!list.contains(value)) {
-            list.add(value);
+    private static int indexOfFirstWithLeft(List<Production> productions, String leftSide) {
+        for (int i = 0; i < productions.size(); i++) {
+            if (productions.get(i).getLeftSide().equals(leftSide)) {
+                return i;
+            }
         }
+        return -1;
+    }
+
+    /**
+     * Devuelve los elementos de {@code from} que no están en {@code other}, en su
+     * orden y sin repetidos.
+     */
+    private static List<String> difference(List<String> from, List<String> other) {
+        List<String> result = new ArrayList<>();
+        for (String value : from) {
+            if (!other.contains(value) && !result.contains(value)) {
+                result.add(value);
+            }
+        }
+        return result;
+    }
+
+    private static List<String> productionStrings(List<Production> productions) {
+        List<String> result = new ArrayList<>();
+        for (Production production : productions) {
+            result.add(production.toString());
+        }
+        return result;
     }
 
     private static String render(Production production) {
