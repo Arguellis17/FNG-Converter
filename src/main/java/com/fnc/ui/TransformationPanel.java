@@ -6,7 +6,7 @@ import com.fnc.model.TransformationStep;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -14,6 +14,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -96,12 +97,16 @@ public class TransformationPanel extends VBox {
     }
 
     /**
-     * Coloca los botones de control a la derecha de la lista de pasos.
+     * Coloca los nodos de control a la derecha de la lista de pasos.
+     * El primer nodo se ubica por encima del resto (por ejemplo, el selector
+     * de destino); los nodos que ocupan ancho se estiran a todo el ancho.
      */
-    public void setActionButtons(Button... buttons) {
-        buttonBox.getChildren().setAll(buttons);
-        for (Button button : buttons) {
-            button.setMaxWidth(Double.MAX_VALUE);
+    public void setActionButtons(Node... nodes) {
+        buttonBox.getChildren().setAll(nodes);
+        for (Node node : nodes) {
+            if (node instanceof Region) {
+                ((Region) node).setMaxWidth(Double.MAX_VALUE);
+            }
         }
     }
 

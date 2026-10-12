@@ -11,8 +11,23 @@ package com.fnc.model;
 public enum ConversionTarget {
 
     /** Forma Normal de Chomsky: solo el pipeline FNC (pasos 0 a 6). */
-    CHOMSKY,
+    CHOMSKY("FNC (Chomsky)"),
 
     /** Forma Normal de Greibach: pipeline FNC más el motor FNG (pasos 0 a 13). */
-    GREIBACH
+    GREIBACH("FNG (Greibach)");
+
+    private final String label;
+
+    ConversionTarget(String label) {
+        this.label = label;
+    }
+
+    /**
+     * Etiqueta visible del destino, para mostrarla en la interfaz.
+     *
+     * @return "FNC (Chomsky)" o "FNG (Greibach)"
+     */
+    public String getLabel() {
+        return label;
+    }
 }
