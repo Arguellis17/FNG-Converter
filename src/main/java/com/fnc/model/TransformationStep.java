@@ -106,6 +106,27 @@ public class TransformationStep {
     }
 
     /**
+     * Devuelve una copia de este paso con todos los campos iguales salvo
+     * {@code menuNumber}, que pasa a valer {@code n}. El paso original no se
+     * modifica (la clase es inmutable).
+     *
+     * @param n nuevo número de menú
+     * @return copia con el {@code menuNumber} indicado
+     */
+    public TransformationStep withMenuNumber(int n) {
+        return new TransformationStep(
+                stepName,
+                description,
+                grammarBefore,
+                grammarAfter,
+                productionsRemoved,
+                productionsAdded,
+                details,
+                n,
+                customBody);
+    }
+
+    /**
      * Indica si el paso realmente transformó algo.
      */
     public boolean hasChanges() {
