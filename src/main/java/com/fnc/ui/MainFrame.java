@@ -1,7 +1,8 @@
 package com.fnc.ui;
 
-import com.fnc.engine.GrammarService;
+import com.fnc.engine.ConversionService;
 import com.fnc.engine.GrammarValidator;
+import com.fnc.model.ConversionTarget;
 import com.fnc.model.Grammar;
 import com.fnc.model.TransformationStep;
 import javafx.beans.property.BooleanProperty;
@@ -10,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -24,13 +26,20 @@ import java.util.List;
  * Ventana principal del aplicativo (menú + paneles).
  * Ofrece modo automático (proceso completo) y modo paso a paso
  * (botón "Ejecutar el paso a paso" + "Continuar"), ambos sobre el
- * pipeline de {@link GrammarService}.
+ * pipeline elegido por {@link ConversionService} según el
+ * {@link ConversionTarget} seleccionado (FNC o FNG).
  */
 public class MainFrame extends BorderPane {
 
     private final GrammarInputPanel inputPanel;
     private final TransformationPanel transformationPanel;
     private final Label lblStatus;
+
+    /** Fachada del motor: elige el pipeline (FNC o FNG) según el destino. */
+    private final ConversionService conversionService = new ConversionService();
+
+    /** Selector del destino de conversión (FNC o FNG). */
+    private final ComboBox<ConversionTarget> targetSelector = new ComboBox<>();
 
     /** Gramática sobre la que se aplica la siguiente etapa (modo paso a paso). */
     private Grammar workingGrammar;
@@ -77,7 +86,16 @@ public class MainFrame extends BorderPane {
         // La validez la dicta el panel de entrada (validación silenciosa).
         grammarValid.bind(inputPanel.validProperty());
 
-        transformationPanel.setActionButtons(btnFull, btnStepByStep, btnContinue);
+        // Selector de destino: FNC por defecto (comportamiento del Microproyecto #1).
+        targetSelector.getItems().setAll(ConversionTarget.values());
+        targetSelector.setValue(ConversionTarget.CHOMSKY);
+        targetSelector.valueProperty().addListener(
+                (obs, oldTarget, newTarget) -> onTargetChanged(newTarget));
+        // Se bloquea mientras dura un paso a paso con pasos por mostrar.
+        targetSelector.disableProperty().bind(hasNextStep);
+
+        transformationPanel.setActionButtons(
+                targetSelector, btnFull, btnStepByStep, btnContinue);
 
         setTop(buildMenuBar());
         setLeft(inputPanel);
@@ -117,13 +135,13 @@ public class MainFrame extends BorderPane {
 
         resetStepByStep();
 
-        List<TransformationStep> steps = new GrammarService().convertFull(grammar);
+        List<TransformationStep> steps = conversionService.convert(grammar, targetSelector.getValue());
         Grammar current = steps.get(steps.size() - 1).getGrammarAfter();
 
         workingGrammar = current;
         transformationPanel.setSteps(steps);
         setStatus("Proceso completo: " + steps.size()
-                + " pasos. Gramática final lista.");
+                + " pasos. Gramática final lista (" + destinationTag() + ").");
     }
 
     /**
@@ -136,7 +154,7 @@ public class MainFrame extends BorderPane {
             return;
         }
 
-        pendingSteps = new GrammarService().convertFull(grammar);
+        pendingSteps = conversionService.convert(grammar, targetSelector.getValue());
         currentStepIndex = 0;
 
         transformationPanel.clear();
@@ -151,7 +169,8 @@ public class MainFrame extends BorderPane {
             return;
         }
         if (currentStepIndex + 1 >= pendingSteps.size()) {
-            setStatus("Ya se mostró el último paso. Gramática final lista.");
+            setStatus("Ya se mostró el último paso. Gramática final lista ("
+                    + destinationTag() + ").");
             return;
         }
         currentStepIndex++;
@@ -173,6 +192,22 @@ public class MainFrame extends BorderPane {
         pendingSteps = null;
         currentStepIndex = -1;
         hasNextStep.set(false);
+    }
+
+    /**
+     * Al cambiar el destino: reinicia el paso a paso y limpia el historial,
+     * sin tocar la gramática del formulario.
+     */
+    private void onTargetChanged(ConversionTarget newTarget) {
+        resetStepByStep();
+        transformationPanel.clear();
+        setStatus("Destino: " + newTarget.getLabel()
+                + ". Ejecute el proceso completo o paso a paso.");
+    }
+
+    /** Etiqueta corta del destino actual ("FNC" o "FNG") para la barra de estado. */
+    private String destinationTag() {
+        return targetSelector.getValue() == ConversionTarget.CHOMSKY ? "FNC" : "FNG";
     }
 
     /**
@@ -224,9 +259,11 @@ public class MainFrame extends BorderPane {
     private void showAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Acerca de");
-        alert.setHeaderText("FNC Converter");
+        alert.setHeaderText("Conversor de gramáticas — FNC y FNG");
         alert.setContentText("Aplicativo para depuración y conversión de Gramáticas "
-                + "Libres de Contexto a Forma Normal de Chomsky.\nTeoría de la Computación - Microproyecto #1.");
+                + "Libres de Contexto a Forma Normal de Chomsky (FNC, Microproyecto #1) "
+                + "y a Forma Normal de Greibach (FNG, Microproyecto #2).\n"
+                + "Teoría de la Computación.");
         alert.showAndWait();
     }
 

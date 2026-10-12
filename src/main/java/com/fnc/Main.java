@@ -6,15 +6,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Main entry point for the FNC Converter application.
- * Context-Free Grammar to Chomsky Normal Form converter
- * with step-by-step visualization.
+ * Main entry point for the grammar converter application.
+ * Context-Free Grammar converter to Chomsky Normal Form (FNC) and
+ * Greibach Normal Form (FNG) with step-by-step visualization.
  */
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("FNC Converter - Gramática a Forma Normal de Chomsky");
+        primaryStage.setTitle("Conversor de gramáticas — FNC y FNG");
 
         MainFrame root = new MainFrame();
         Scene scene = new Scene(root, 1100, 700);
