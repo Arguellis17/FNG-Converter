@@ -26,6 +26,8 @@ class FncComplianceCheckerTest {
 
         assertTrue(checker.isCompliant(), "G1 está en FNC");
         assertFalse(checker.isStartNullable(), "G1 no tiene S → ε");
+        assertFalse(step.hasChanges(), "Sin S → ε no se aparta nada: sin cambios");
+        assertTrue(step.getProductionsRemoved().isEmpty());
         assertTrue(step.getDetails().contains("Producciones revisadas: 6."));
         assertTrue(step.getDetails().contains(
                 "Resultado: la gramática está en FNC del curso."));
@@ -42,9 +44,23 @@ class FncComplianceCheckerTest {
         assertTrue(checker.isCompliant(), "G3 cumple la FNC del curso");
         assertTrue(hasStartNull(step.getGrammarBefore()), "grammarBefore conserva S → ε");
         assertFalse(hasStartNull(step.getGrammarAfter()), "grammarAfter no debe tener S → ε");
+        assertTrue(step.hasChanges(), "Apartar S → ε sí es un cambio");
+        assertTrue(step.getProductionsRemoved().contains("S -> ε"),
+                "La producción apartada debe registrarse en productionsRemoved");
         assertTrue(step.getDetails().contains(
                 "Se aparta S → ε: se reincorporará en el paso 13 si S no aparece en "
                 + "ningún lado derecho."));
+    }
+
+    /** G3: al apartar S → ε el paso reporta cambios y registra la producción. */
+    @Test
+    void g3ApartarEpsilonRegistraProduccionEliminada() {
+        FncComplianceChecker checker = new FncComplianceChecker();
+        TransformationStep step = checker.check(g3());
+
+        assertEquals(List.of("S -> ε"), step.getProductionsRemoved());
+        assertTrue(step.getProductionsAdded().isEmpty());
+        assertTrue(step.hasChanges());
     }
 
     /** Producción de 3 símbolos: violación. */

@@ -18,8 +18,9 @@ import java.util.Set;
  * todos los símbolos usados estén declarados y que no haya variables inútiles
  * ni inalcanzables (con los eliminadores existentes sobre una copia).
  * <p>
- * Si existe {@code S → ε} se aparta de {@link #check(Grammar) grammarAfter} y se
- * recuerda con {@link #isStartNullable()} para reincorporarlo en el paso 13. Si
+ * Si existe {@code S → ε} se aparta de {@link #check(Grammar) grammarAfter}, se
+ * recuerda con {@link #isStartNullable()} para reincorporarlo en el paso 13 y se
+ * registra en {@code productionsRemoved}, de modo que el paso reporte cambios. Si
  * alguna verificación falla, se informa con una línea {@code "✘ "} por violación
  * y {@link #isCompliant()} devuelve {@code false}; nunca se lanza excepción.
  */
@@ -97,10 +98,17 @@ public class FncComplianceChecker {
         details.addAll(violations);
 
         Grammar after = fnc.copy();
+        List<String> productionsRemoved = new ArrayList<>();
         if (compliant) {
             details.add("Resultado: la gramática está en FNC del curso.");
         }
         if (startNullable) {
+            for (Production production : after.getProductions()) {
+                if (production.isNull()
+                        && production.getLeftSide().equals(fnc.getStartSymbol())) {
+                    productionsRemoved.add(production.toString());
+                }
+            }
             after.getProductions().removeIf(p -> p.isNull()
                     && p.getLeftSide().equals(fnc.getStartSymbol()));
             details.add("Se aparta S → ε: se reincorporará en el paso 13 si S no "
@@ -112,7 +120,7 @@ public class FncComplianceChecker {
                 "Se revisa que la gramática esté en la Forma Normal de Chomsky del curso.",
                 before,
                 after,
-                List.of(),
+                productionsRemoved,
                 List.of(),
                 details,
                 MENU_NUMBER,
