@@ -15,8 +15,8 @@ public class Production {
 
     public Production(String leftSide, List<String> rightSide) {
         this.leftSide = leftSide;
-        this.rightSide = rightSide;
-        this.isNull = rightSide.isEmpty() || rightSide.contains("ε");
+        this.rightSide = rightSide == null ? List.of() : List.copyOf(rightSide);
+        this.isNull = this.rightSide.isEmpty() || this.rightSide.contains("ε");
     }
 
     public String getLeftSide() {

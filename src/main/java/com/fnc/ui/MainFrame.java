@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Ventana principal del aplicativo (menú + paneles).
  * Ofrece modo automático (proceso completo) y modo paso a paso
- * (botón "Ejecutar el paso a paso" + "Continuar"), ambos sobre el
+ * (botón "Ejecutar el paso a paso" + "Siguiente paso"), ambos sobre el
  * pipeline elegido por {@link ConversionService} según el
  * {@link ConversionTarget} seleccionado (FNC o FNG).
  */
@@ -78,7 +78,7 @@ public class MainFrame extends BorderPane {
         // Solo se habilita cuando la gramática pasa la validación silenciosa.
         btnStepByStep.disableProperty().bind(grammarValid.not());
 
-        Button btnContinue = new Button("Continuar");
+        Button btnContinue = new Button("Siguiente paso");
         btnContinue.setOnAction(e -> continueStepByStep());
         // Requiere gramática válida y que quede un siguiente paso por mostrar.
         btnContinue.disableProperty().bind(grammarValid.not().or(hasNextStep.not()));
@@ -146,7 +146,7 @@ public class MainFrame extends BorderPane {
 
     /**
      * Inicia el modo paso a paso: calcula todos los pasos y muestra
-     * únicamente el primero. Cada click en "Continuar" revela el siguiente.
+     * únicamente el primero. Cada click en "Siguiente paso" revela el siguiente.
      */
     private void startStepByStep() {
         Grammar grammar = parseAndValidate();
@@ -184,7 +184,7 @@ public class MainFrame extends BorderPane {
         workingGrammar = step.getGrammarAfter();
         hasNextStep.set(currentStepIndex + 1 < pendingSteps.size());
         setStatus("Paso " + (currentStepIndex + 1) + " de " + pendingSteps.size()
-                + ": " + step.getStepName() + ". Pulse \"Continuar\".");
+                + ": " + step.getStepName() + ". Pulse \"Siguiente paso\".");
     }
 
     /** Reinicia la sesión paso a paso. */
