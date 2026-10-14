@@ -6,8 +6,6 @@ Software en Java que convierte una Gramática Libre de Contexto expresada en
 
 Teoría de la Computación — Microproyecto #2.
 
-> Este README se actualiza a medida que el proyecto avanza.
-
 ## Pipeline
 
 | # | Etapa | Qué hace |
@@ -55,9 +53,9 @@ src/test/java/com/fnc/     # Pruebas unitarias JUnit 5
 
 ## Entregables
 
-- [ ] Código fuente funcional y documentado
-- [ ] Documento técnico
-- [ ] Manual de usuario
+- [x] Código fuente funcional y documentado
+- [x] Documento técnico
+- [x] Manual de usuario
 
 ## Equipo
 
