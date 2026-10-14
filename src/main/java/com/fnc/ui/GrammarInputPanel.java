@@ -2,6 +2,9 @@ package com.fnc.ui;
 
 import com.fnc.model.Grammar;
 import com.fnc.model.Production;
+import com.fnc.model.ConversionTarget;
+import com.fnc.engine.InputFncInspector;
+import com.fnc.engine.StrictModeValidator;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;

@@ -84,10 +84,15 @@ public class Grammar {
      * Get all variables that appear on the right side of any production.
      */
     public Set<String> getVariablesInRightSide() {
-        return productions.stream()
-                .flatMap(p -> p.getRightSide().stream())
-                .filter(s -> variables.contains(s))
-                .collect(Collectors.toSet());
+        LinkedHashSet<String> result = new LinkedHashSet<>();
+        for (Production p : productions) {
+            for (String s : p.getRightSide()) {
+                if (variables.contains(s)) {
+                    result.add(s);
+                }
+            }
+        }
+        return result;
     }
 
     /**

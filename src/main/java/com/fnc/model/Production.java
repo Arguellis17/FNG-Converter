@@ -15,8 +15,8 @@ public class Production {
 
     public Production(String leftSide, List<String> rightSide) {
         this.leftSide = leftSide;
-        this.rightSide = rightSide;
-        this.isNull = rightSide.isEmpty() || rightSide.contains("ε");
+        this.rightSide = rightSide == null ? List.of() : List.copyOf(rightSide);
+        this.isNull = this.rightSide.isEmpty() || this.rightSide.contains("ε");
     }
 
     public String getLeftSide() {
@@ -39,8 +39,22 @@ public class Production {
         return rightSide.size() == 2;
     }
 
+    /**
+     * Indica si la producción es de un solo símbolo y ese símbolo es un
+     * terminal. Se considera terminal a todo símbolo que no empieza con
+     * mayúscula y que no es la cadena vacía ε. Así se reconocen como
+     * terminales no solo las letras minúsculas, sino también dígitos y otros
+     * símbolos (por ejemplo {@code 1}, {@code 2}) que antes no se detectaban.
+     */
     public boolean isTerminal() {
-        return rightSide.size() == 1 && Character.isLowerCase(rightSide.get(0).charAt(0));
+        if (rightSide.size() != 1) {
+            return false;
+        }
+        String symbol = rightSide.get(0);
+        if (symbol.isEmpty() || symbol.equals("ε")) {
+            return false;
+        }
+        return !Character.isUpperCase(symbol.charAt(0));
     }
 
     @Override
