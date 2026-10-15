@@ -124,8 +124,8 @@ src/test/java/com/fnc/   # Pruebas JUnit 5
 ## Entregables
 
 - [x] Código fuente funcional y documentado
-- [ ] Documento técnico
-- [ ] Manual de usuario
+- [X] Documento técnico
+- [X] Manual de usuario
 
 ## Equipo
 
